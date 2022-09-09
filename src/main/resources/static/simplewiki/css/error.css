@@ -1,0 +1,20 @@
+.error-content {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    width: 100%;
+    text-align: center;
+}
+
+.error-content > h1 {
+    font-size: 72px;
+    color: #434e59;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.error-content > p {
+    font-size: 20px;
+    color: rgba(0, 0, 0, .45);
+    margin-bottom: 16px;
+}

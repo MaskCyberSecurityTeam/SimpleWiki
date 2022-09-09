@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="common :: head"/>
+    <th:block th:replace="common :: layui"/>
+    <link href="/static/simplewiki/css/login.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="layui-container login-container">
+    <div class="layui-row">
+        <div class="layui-col-md3">&nbsp;</div>
+        <div class="layui-col-md6 login-panel">
+            <span class="login-panel-title" th:text="${@simplewiki.title}"></span>
+            <form class="layui-form layui-form-pane" method="post" action="/user/login">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="username" required lay-verify="required" placeholder="请输入用户名"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密&nbsp;码</label>
+                    <div class="layui-input-block">
+                        <input type="password" name="password" required lay-verify="required" placeholder="请输入密码"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">验证码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="code" required lay-verify="required" placeholder="请输入验证码"
+                               autocomplete="off" class="layui-input">
+                        <img class="login-panel-captcha" src="/captcha"
+                             onclick="this.src='/captcha?date=' + new Date()"/>
+                    </div>
+                </div>
+                <button type="submit" class="layui-btn layui-btn-normal layui-btn-fluid">登&nbsp;录</button>
+            </form>
+        </div>
+        <div class="layui-col-md3">&nbsp;</div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['layer', 'jquery'], function () {
+        var layer = layui.layer;
+
+        if ('[[${msg}]]' != '') {
+            layer.msg('[[${msg}]]');
+        }
+    });
+</script>
+</html>
+

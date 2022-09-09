@@ -1,0 +1,18 @@
+server:
+  port: 8080
+spring:
+  mvc:
+    static-path-pattern: /static/**
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:SimpleWiki.db
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  profiles:
+    active: dev
+mybatis-plus:
+  mapper-locations: mapper/**/*.xml
+simplewiki:
+  title: SimpleWiki Dev

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="common :: head"/>
+    <link rel="stylesheet" href="/static/editor/editormd.min.css"/>
+</head>
+<body>
+<div id="editor">
+    <textarea style="display:none;" th:text="${content}"></textarea>
+</div>
+</body>
+<script src="/static/base64/base64.js"></script>
+<script src="/static/editor/jquery.min.js"></script>
+<script src="/static/editor/editormd.min.js"></script>
+<script src="/static/layer/layer.js"></script>
+<script>
+    $(function () {
+        var targetMdFile = "[[${targetMdFile}]]"
+
+        var editor = editormd("editor", {
+            width: "100%",
+            height: "100%",
+            path: "/static/editor/lib/",
+            imageUpload: true,
+            imageFormats: ["jpg", "jpeg", "gif", "png"],
+            imageUploadURL: "/markdown/upload?targetMdDir=[[${targetMdDir}]]",
+            toolbarIcons: function () {
+                return [
+                    "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "hr", "|",
+                    "h1", "h2", "h3", "h4", "h5", "h6", "|",
+                    "list-ul", "list-ol", "|",
+                    "link", "code", "code-block", "table", "image", "|",
+                    "undo", "redo", "clear", "|",
+                    "save", "|", "||",
+                    "watch", "preview"
+                ];
+            },
+            toolbarIconTexts: {
+                save: "保存"
+            },
+            toolbarHandlers: {
+                save: save,
+            },
+            onload: function () {
+                // 引入插件 执行监听方法
+                editormd.loadPlugin("/static/editor/plugins/image-handle-paste/image-handle-paste", function () {
+                    editor.imagePaste();
+                });
+                this.fullscreen();
+                this.previewing();
+            }
+        });
+
+        function save() {
+            var content = Base64.encode(editor.getMarkdown());
+            $.post("/markdown/save", {"content": content, "targetMdFile": targetMdFile}, function (data) {
+                layer.msg(data.msg);
+            });
+        }
+    });
+</script>
+</html>
+

@@ -1,0 +1,38 @@
+body {
+    background-color: #222222;
+}
+
+.login-container {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+.login-panel {
+    padding: 10px;
+    background: #282828;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+.login-btn {
+    width: 100%;
+}
+
+.login-panel-title {
+    position: absolute;
+    color: white;
+    font-size: 30px;
+    top: -25%;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+.login-panel-captcha {
+    height: 35px;
+    position: absolute;
+    right: 1px;
+    top: 0;
+    cursor: pointer;
+}

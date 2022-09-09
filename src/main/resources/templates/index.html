@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="common :: head"/>
+    <th:block th:replace="common :: layui"/>
+    <link href="/static/layui/ext/dtree/dtree.css" rel="stylesheet">
+    <link href="/static/layui/ext/dtree/font/dtreefont.css" rel="stylesheet">
+    <link href="/static/simplewiki/css/index.css" rel="stylesheet">
+</head>
+<body>
+
+<ul id="navigation" class="layui-nav">
+    <li class="layui-nav-item"><a href="/index">首页</a></li>
+    <li class="layui-nav-item"><a href="https://gitee.com/MaskCyberSecurityTeam/SimpleWiki" target="_blank">GitEE</a>
+    </li>
+    <li class="layui-nav-item"><a href="https://github.com/MaskCyberSecurityTeam/SimpleWiki" target="_blank">GitHub</a>
+    </li>
+    <li class="layui-nav-item"><a href="https://github.com/MaskCyberSecurityTeam/SimpleWiki/issues"
+                                  target="_blank">问题反馈</a></li>
+    <li class="layui-nav-item">
+        <a href="javascript:void(0);"><img src="https://avatars.githubusercontent.com/u/107802263?s=200&v=4"
+                                           class="layui-nav-img">我</a>
+        <dl class="layui-nav-child">
+            <dd><a id="changePasswordBtn" href="javascript:void(0);">修改密码</a></dd>
+            <dd><a href="/user/logout">退出</a></dd>
+        </dl>
+    </li>
+</ul>
+
+<div class="layui-container">
+    <div class="layui-row layui-col-space20">
+        <div class="layui-col-md2 catalog-container">
+            <div class="layui-card catalog-card">
+                <div class="layui-card-header">目录</div>
+                <input id="filterInput" type="text" placeholder="请输入关键字" autocomplete="off" class="layui-input">
+                <div class="layui-btn-group catalog-menubar">
+                    <button id="catalogMenubarRefreshBtn" type="button"
+                            class="layui-btn layui-btn-primary layui-btn-sm">
+                        <i class="layui-icon">&#xe669;</i>
+                    </button>
+                    <button id="catalogMenubarCreateNodeBtn" type="button"
+                            class="layui-btn layui-btn-primary layui-btn-sm">
+                        <i class="layui-icon">&#xe61f;</i>
+                    </button>
+                </div>
+                <div class="layui-card-body">
+                    <div id="dtreeContent"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md10 editor-container">
+            <div class="layui-card editor-card">
+                <div id="editorContentTitle" class="layui-card-header">/index.md</div>
+                <div class="layui-card-body">
+                    <iframe id="editorContent" src="/markdown?fileName=index"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<div id="treeNodeAddForm" class="layui-form alert-form" style="display: none;">
+    <input id="treeNodeAddFormNodeName" type="text" class="layui-input alert-form-input" placeholder="名称">
+    <select id="treeNodeAddFormNodeType">
+        <option value="file">文件</option>
+        <option value="dir">文件夹</option>
+    </select>
+</div>
+
+<div id="changePasswordForm" class="layui-form alert-form" style="display: none;">
+    <input id="oldPasswordInput" type="password" class="layui-input alert-form-input" placeholder="旧密码">
+    <input id="newPasswordInput" type="password" class="layui-input alert-form-input" placeholder="新密码">
+    <input id="againNewPasswordInput" type="password" class="layui-input alert-form-input" placeholder="重复新密码">
+</div>
+
+<script>
+    layui.use(['dtree', 'layer', 'jquery', 'form', 'element'], function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var dtree = layui.dtree;
+        var element = layui.element;
+        var filterInput = $("#filterInput");
+        var editorContent = $("#editorContent");
+        var changePasswordBtn = $("#changePasswordBtn");
+        var changePasswordForm = $("#changePasswordForm");
+        var editorContentTitle = $("#editorContentTitle");
+        var catalogMenubarRefreshBtn = $("#catalogMenubarRefreshBtn");
+        var catalogMenubarCreateNodeBtn = $("#catalogMenubarCreateNodeBtn");
+
+        // 目录渲染
+        var dtreeInstance = dtree.render({
+            elem: "#dtreeContent",
+            icon: "-1",
+            initLevel: 1,
+            width: "100%",
+            height: "100%",
+            toolbar: true,
+            method: "GET",
+            url: "/catalog",
+            toolbarWay: "follow",
+            defaultRequest: {nodeId: "fileName", parentId: "fileDir"},
+            iconfontStyle: [{
+                fnode: {
+                    node: {
+                        open: "dtree-icon-wenjianjiazhankai",
+                        close: "dtree-icon-weibiaoti5"
+                    },
+                    leaf: "dtree-icon-normal-file"
+                }
+            }],
+            toolbarShow: [],
+            toolbarExt: [
+                {
+                    title: "修改",
+                    toolbarId: "editToolbarBtn",
+                    icon: "dtree-icon-bianji",
+                    handler: treeNodeEdit
+                },
+                {
+                    title: "新增",
+                    toolbarId: "addToolbarBtn",
+                    icon: "dtree-icon-roundadd",
+                    handler: treeNodeAdd
+                },
+                {
+                    title: "删除",
+                    toolbarId: "delToolbarBtn",
+                    icon: "dtree-icon-roundclose",
+                    handler: treeNodeDel
+                }
+
+            ],
+            toolbarFun: {
+                loadToolbarBefore: loadToolbarBefore
+            }
+        });
+
+        // 目录节点点击监听
+        dtree.on("node('dtreeContent')", function (obj) {
+            var uri;
+            if (obj.param.leaf) {
+                uri = "/markdown?fileDir=" + obj.param.fileDir + "&fileName=" + obj.param.fileName;
+            } else {
+                uri = "/markdown?fileDir=" + obj.param.fileDir + "&fileName=index";
+            }
+            editorContent.attr("src", uri);
+            editorContentTitle.text(obj.param.fileDir);
+        });
+
+        // 目录内容搜索
+        filterInput.bind('input', function () {
+            $.get("/catalog/search?keyword=" + filterInput.val(), function (data) {
+                dtree.reload("dtreeContent", {data: data.data});
+            });
+        });
+
+        // 节点加载前操作
+        function loadToolbarBefore(buttons, param, $div) {
+            if (param.leaf) {
+                // 叶子节点取消新增的功能
+                buttons.addToolbarBtn = "";
+            }
+            return buttons;
+        }
+
+        // 节点修改
+        function treeNodeEdit(node, $div) {
+            layer.prompt({
+                formType: 0,
+                value: node.context,
+                title: '节点修改'
+            }, function (value, index, elem) {
+                $.post("/catalog/edit", {"newName": value, "targetFilePath": node.fileDir}, function (data) {
+                    layer.msg(data.msg);
+                });
+            });
+        }
+
+        // 节点新增
+        function treeNodeAdd(node, $div) {
+            layer.open({
+                type: 1,
+                title: "新增",
+                area: ['400px', '260px'],
+                content: $("#treeNodeAddForm"),
+                btn: ['新增', '取消'],
+                yes: function (index, layero) {
+                    var nodeDir = node.fileDir;
+                    var nodeName = $("#treeNodeAddFormNodeName").val()
+                    var nodeType = $("#treeNodeAddFormNodeType").val()
+                    $.post("/catalog/add", {nodeDir, nodeName, nodeType}, function (data) {
+                        layer.msg(data.msg);
+                    });
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        }
+
+        // 节点删除
+        function treeNodeDel(node, $div) {
+            layer.confirm('确定删除' + node.context + '?', {icon: 3, title: '提示'}, function (index) {
+                $.get("/catalog/del?targetFilePath=" + node.fileDir, function (data) {
+                    layer.msg(data.msg);
+                });
+            });
+        }
+
+        // 修改密码
+        changePasswordBtn.click(function () {
+            layer.open({
+                type: 1,
+                title: "修改密码",
+                area: ['400px', '300px'],
+                content: changePasswordForm,
+                btn: ['修改', '取消'],
+                yes: function (index, layero) {
+                    var oldPassword = $("#oldPasswordInput").val()
+                    var newPassword = $("#newPasswordInput").val();
+                    var againNewPassword = $("#againNewPasswordInput").val();
+                    if (newPassword !== againNewPassword) {
+                        layer.msg("重复密码不相同!");
+                        return;
+                    }
+                    // 修改密码
+                    $.post("/user/changePassword", {oldPassword, newPassword}, function (data) {
+                        layer.msg(data.msg);
+                    });
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        });
+
+        // 菜单工具栏 - 刷新按钮
+        catalogMenubarRefreshBtn.click(function () {
+            dtreeInstance.refreshTree();
+        });
+
+        // 菜单工具栏 - 创建根节点按钮
+        catalogMenubarCreateNodeBtn.click(function () {
+            layer.open({
+                type: 1,
+                title: "新增",
+                area: ['400px', '260px'],
+                content: $("#treeNodeAddForm"),
+                btn: ['新增', '取消'],
+                yes: function (index, layero) {
+                    var nodeName = $("#treeNodeAddFormNodeName").val()
+                    var nodeType = $("#treeNodeAddFormNodeType").val()
+                    $.post("/catalog/add", {"nodeDir": "/", nodeName, nodeType}, function (data) {
+                        layer.msg(data.msg);
+                    });
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            });
+        });
+    });
+</script>
+</html>
+
