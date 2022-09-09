@@ -4,8 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-library
-resource
+library/**
+resource/**
 
 ### STS ###
 .apt_generated
