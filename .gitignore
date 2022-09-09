@@ -6,6 +6,7 @@ target/
 
 /library/*
 /resource/*
+!.gitkeep
 
 ### STS ###
 .apt_generated
