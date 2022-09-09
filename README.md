@@ -4,10 +4,11 @@ SimpleWiki - 用于展示Markdown文件的内部小型文档库程序
 
 ## 文件说明
 
-* library 文档文件夹，将需要展示的Markdown文件放置该目录。
-* resource 资源文件夹，Markdown文件中引用的图片放置该目录。
-* SimpleWiki.db 数据库(里边就一张User表目前 :P)
-* SimpleWiki.jar 主程序
+* SimpleWiki.zip
+  * library 文档文件夹，将需要展示的Markdown文件放置该目录。
+  * resource 资源文件夹，Markdown文件中引用的图片放置该目录。
+  * SimpleWiki.db 数据库(里边就一张User表目前 :P)
+  * SimpleWiki.jar 主程序
 
 ## 运行
 
