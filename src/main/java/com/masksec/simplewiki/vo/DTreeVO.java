@@ -88,13 +88,12 @@ public class DTreeVO {
         if (StrUtil.isEmpty(keyword)) {
             return getCatalog(null);
         }
-
         List<DTreeNodeVO> items = new ArrayList<>();
-        for (File file : Path.LIBRARY_DIR.listFiles()) {
-            if (file.isFile() && file.getName().contains(keyword)) {
+        com.masksec.simplewiki.util.FileUtil.loopFileAndDir(Path.LIBRARY_DIR, file -> {
+            if (file.getName().contains(keyword)) {
                 items.add(DTreeNodeVO.getDTreeNode(file));
             }
-        }
+        });
         return new DTreeVO(items);
     }
 }
