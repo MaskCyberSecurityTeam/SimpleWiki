@@ -34,3 +34,7 @@ nohup java -jar SimpleWiki.jar --spring.profiles.active=prod --server.port=8081 
 在线编写时上传和粘贴图片会自动上传至`resource`目录下
 
 Markdown应用图片时的写法: `![](resource/xxx/xxx.png)`
+
+# BugFix
+
+* 在搜索出的文件夹基础上创建文件，文件创建的路径存在问题。
